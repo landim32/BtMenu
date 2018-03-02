@@ -18,6 +18,7 @@ class BtMenu extends BtMenuBase
     private $target;
     private $modal = false;
     private $badge = null;
+    private $active = false;
     private $subMenu = array();
 
     /**
@@ -138,8 +139,30 @@ class BtMenu extends BtMenuBase
         return $this->badge;
     }
 
+    /**
+     * @param bool $value
+     * @return BtMenu
+     */
     public function setBadge($value) {
         $this->badge = $value;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool $active
+     * @return BtMenu
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
         return $this;
     }
 
@@ -181,34 +204,50 @@ class BtMenu extends BtMenuBase
         switch ($format) {
             case BtMenu::LIST_GROUP:
                 $className = "list-group-item";
-                if (!isNullOrEmpty($this->getClassName())) {
+                if (strlen($this->getClassName()) > 0) {
                     $className .= " " . $this->getClassName();
                 }
                 $str .= "<a href=\"" . $this->getUrl() . "\" class=\"" . $className . "\"";
                 if ($this->getModal() == true) {
                     $str .= " data-toggle=\"modal\" data-target=\"" . $this->getUrl() . "\"";
                 }
-                if (!isNullOrEmpty($this->getTarget())) {
+                if (strlen($this->getTarget()) > 0) {
                     $str .= " target=\"" . $this->getTarget() . "\"";
                 }
                 $str .= ">";
-                if (!isNullOrEmpty($this->getBadge())) {
+                if (strlen($this->getBadge()) > 0) {
                     $str .= sprintf("<span class=\"badge pull-right\">%s</span> ", $this->getBadge());
                 }
-                if (!isNullOrEmpty($this->getIcon())) {
+                if (strlen($this->getIcon()) > 0) {
                     $str .= sprintf("<i class=\"%s\"></i> ", $this->getIcon());
                 }
                 $str .= $this->getLabel() . "</a>\n";
                 break;
             default:
                 if (count($this->subMenu) > 0) {
-                    $str .= "<li class=\"dropdown\">";
+                    $classes = array("dropdown");
+                    if ($this->isActive()) {
+                        $classes[] = "active";
+                    }
+                    else {
+                        $active = false;
+                        foreach ($this->getSubMenu() as $menu) {
+                            if ($menu instanceof BtMenu && $menu->isActive()) {
+                                $active = true;
+                                break;
+                            }
+                        }
+                        if ($active) {
+                            $classes[] = "active";
+                        }
+                    }
+                    $str .= "<li class=\"" . implode(" ", $classes) . "\">";
                     $str .= "<a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\" " .
                         "aria-haspopup=\"true\" aria-expanded=\"false\">";
-                    if (!isNullOrEmpty($this->getIcon())) {
+                    if (strlen($this->getIcon()) > 0) {
                         $str .= sprintf("<i class=\"%s\"></i>", $this->getIcon());
                     }
-                    if (!isNullOrEmpty($this->getLabel())) {
+                    if (strlen($this->getLabel()) > 0) {
                         $str .= " " . $this->getLabel();
                     }
                     $str .= "<span class=\"caret\"></span>";
@@ -220,25 +259,29 @@ class BtMenu extends BtMenuBase
                     $str .= "</ul></li>\n";
                 }
                 else {
-                    $str .= sprintf("<li class=\"%s\">", $this->getClassName());
+                    $classes = array($this->getClassName());
+                    if ($this->isActive()) {
+                        $classes[] = "active";
+                    }
+                    $str .= sprintf("<li class=\"%s\">", implode(" ", $classes));
                     $str .= "<a href=\"" . $this->getUrl() . "\"";
                     if ($this->getModal() == true) {
                         $str .= " data-toggle=\"modal\" data-target=\"" . $this->getUrl() . "\"";
                     }
-                    if (!isNullOrEmpty($this->getTarget())) {
+                    if (strlen($this->getTarget()) > 0) {
                         $str .= " target=\"" . $this->getTarget() . "\"";
                     }
                     $str .= ">";
-                    if (!isNullOrEmpty($this->getIcon())) {
+                    if (strlen($this->getIcon()) > 0) {
                         $str .= sprintf("<i class=\"%s\"></i>", $this->getIcon());
-                        if (!isNullOrEmpty($this->getLabel())) {
+                        if (strlen($this->getLabel()) > 0) {
                             $str .= " " . $this->getLabel();
                         }
                     }
                     else {
                         $str .= $this->getLabel();
                     }
-                    if (!isNullOrEmpty($this->getBadge())) {
+                    if (strlen($this->getBadge()) > 0) {
                         $str .= sprintf("<span class=\"badge pull-right\">%s</span> ", $this->getBadge());
                     }
                     $str .= "</a></li>\n";
