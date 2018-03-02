@@ -101,6 +101,7 @@ class BtMainMenu
     }
 
     /**
+     * Get menu by name, not search in submenus
      * @param string $name
      * @return BtMenu|null
      */
@@ -116,6 +117,34 @@ class BtMainMenu
     }
 
     /**
+     * Get menu by name, not search in submenus
+     * @param string $name
+     * @return BtMenu|null
+     */
+    public function getByName($name) {
+        return $this->get($name);
+    }
+
+    /**
+     * @param string $name
+     * @return BtMenu|null
+     */
+    public function findByName($name) {
+        $retorno = null;
+        foreach ($this->getMenu() as $menu) {
+            if ($menu->getLabel() == $name) {
+                $retorno = $menu;
+                break;
+            }
+            elseif ($menu instanceof BtMenu && $menu->getLabel() == $name) {
+                $retorno = $menu;
+                break;
+            }
+        }
+        return $retorno;
+    }
+
+    /**
      * @return string
      */
     public function render() {
@@ -123,7 +152,7 @@ class BtMainMenu
         switch ($this->getFormat()) {
             case BtMenu::LIST_GROUP:
                 $className = "list-group";
-                if (!isNullOrEmpty($this->getClassName())) {
+                if (strlen($this->getClassName()) > 0) {
                     $className .= " " . $this->getClassName();
                 }
                 $str .= sprintf("<div class=\"%s\">\n", $className);
@@ -134,7 +163,7 @@ class BtMainMenu
                 break;
             default:
                 $className = "nav navbar-nav";
-                if (!isNullOrEmpty($this->getClassName())) {
+                if (strlen($this->getClassName()) > 0) {
                     $className .= " " . $this->getClassName();
                 }
                 $str .= sprintf("<ul class=\"%s\">\n", $className);
